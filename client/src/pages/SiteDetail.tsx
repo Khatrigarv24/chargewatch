@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   getSite,
@@ -38,10 +38,17 @@ export default function SiteDetail() {
   const [to, setTo] = useState(todayISO());
   const [energy, setEnergy] = useState<EnergyPoint[]>([]);
 
+  const latestRequestId = useRef(0);
+
   const reload = () => {
+    const requestId = ++latestRequestId.current;
     getSite(siteId)
-      .then(setData)
-      .catch((e) => setError(e.message));
+      .then((d) => {
+        if (requestId === latestRequestId.current) setData(d);
+      })
+      .catch((e) => {
+        if (requestId === latestRequestId.current) setError(e.message);
+      });
   };
 
   useEffect(reload, [siteId]);
