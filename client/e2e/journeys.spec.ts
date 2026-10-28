@@ -40,17 +40,19 @@ test("starting a session changes the charger to charging", async ({
 }) => {
   await page.goto("/");
   await page.getByTestId("site-card").click();
-  await page.getByTestId("filter-available").click();
-  await page.getByTestId("start-session").click();
-  await expect(page.getByTestId("charger-status")).toHaveText("charging");
+  // Fixture order (by id): available, faulted, charging -- row 0 is available.
+  const row = page.getByTestId("charger-row").nth(0);
+  await row.getByTestId("start-session").click();
+  await expect(row.getByTestId("charger-status")).toHaveText("charging");
 });
 
 test("stopping a session changes it back to available", async ({ page }) => {
   await page.goto("/");
   await page.getByTestId("site-card").click();
-  await page.getByTestId("filter-charging").click();
-  await page.getByTestId("stop-session").click();
-  await expect(page.getByTestId("charger-status")).toHaveText("available");
+  // Fixture order (by id): available, faulted, charging -- row 2 is charging.
+  const row = page.getByTestId("charger-row").nth(2);
+  await row.getByTestId("stop-session").click();
+  await expect(row.getByTestId("charger-status")).toHaveText("available");
 });
 
 test("changing the date range updates the energy chart", async ({ page }) => {
