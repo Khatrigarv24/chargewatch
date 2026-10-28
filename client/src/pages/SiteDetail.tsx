@@ -44,12 +44,6 @@ export default function SiteDetail() {
     const requestId = ++latestRequestId.current;
     getSite(siteId)
       .then((d) => {
-        console.log(
-          "[reload]",
-          requestId,
-          latestRequestId.current,
-          JSON.stringify(d.chargers.map((c) => [c.id, c.status])),
-        );
         if (requestId === latestRequestId.current) setData(d);
       })
       .catch((e) => {

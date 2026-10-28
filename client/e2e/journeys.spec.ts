@@ -1,9 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { closeDb, resetFixture } from "./db";
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async () => {
   await resetFixture();
-  page.on("console", (msg) => console.log(`[browser] ${msg.text()}`));
 });
 
 test.afterAll(async () => {
@@ -41,17 +40,21 @@ test("starting a session changes the charger to charging", async ({
 }) => {
   await page.goto("/");
   await page.getByTestId("site-card").click();
-  await page.getByTestId("filter-available").click();
-  await page.getByTestId("start-session").click();
-  await expect(page.getByTestId("charger-status")).toHaveText("charging");
+  const row = page
+    .getByTestId("charger-row")
+    .filter({ has: page.getByTestId("start-session") });
+  await row.getByTestId("start-session").click();
+  await expect(row.getByTestId("charger-status")).toHaveText("charging");
 });
 
 test("stopping a session changes it back to available", async ({ page }) => {
   await page.goto("/");
   await page.getByTestId("site-card").click();
-  await page.getByTestId("filter-charging").click();
-  await page.getByTestId("stop-session").click();
-  await expect(page.getByTestId("charger-status")).toHaveText("available");
+  const row = page
+    .getByTestId("charger-row")
+    .filter({ has: page.getByTestId("stop-session") });
+  await row.getByTestId("stop-session").click();
+  await expect(row.getByTestId("charger-status")).toHaveText("available");
 });
 
 test("changing the date range updates the energy chart", async ({ page }) => {
