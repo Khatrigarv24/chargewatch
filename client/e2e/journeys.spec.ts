@@ -1,8 +1,18 @@
 import { expect, test } from "@playwright/test";
 import { closeDb, resetFixture } from "./db";
 
-test.beforeEach(async () => {
+test.beforeEach(async ({ page }) => {
   await resetFixture();
+  page.on("console", (msg) => console.log(`[browser:${msg.type()}] ${msg.text()}`));
+  page.on("pageerror", (err) => console.log(`[pageerror] ${err}`));
+  page.on("requestfailed", (req) =>
+    console.log(`[requestfailed] ${req.method()} ${req.url()} ${req.failure()?.errorText}`),
+  );
+  page.on("response", (res) => {
+    if (res.url().includes("/api/chargers/") && res.request().method() === "POST") {
+      console.log(`[response] ${res.status()} ${res.url()}`);
+    }
+  });
 });
 
 test.afterAll(async () => {
