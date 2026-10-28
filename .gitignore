@@ -6,5 +6,6 @@ build/
 coverage/
 playwright-report/
 test-results/
+.shots/
 .DS_Store
 
