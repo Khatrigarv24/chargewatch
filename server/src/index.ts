@@ -18,8 +18,10 @@ app.use("/api/chargers", chargersRouter);
 app.use(errorHandler);
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
-app.listen(port, () => {
-  console.log(`chargewatch server listening on :${port}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`chargewatch server listening on :${port}`);
+  });
+}
 
 export default app;
