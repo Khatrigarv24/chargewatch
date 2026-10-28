@@ -2,6 +2,175 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
+  background: #0a0d10;
+  color: #e7ecf0;
+  font-feature-settings: "tnum" 1;
+}
+
+::selection {
+  background: rgba(53, 231, 183, 0.3);
+}
+
+:focus-visible {
+  outline: 2px solid #35e7b7;
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 50;
+  padding: 0.5rem 1rem;
+  background: #35e7b7;
+  color: #0a0d10;
+}
+.skip-link:focus-visible {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* Current-flow shimmer: the one idle motion, reserved for a charger that
+   actually has current flowing through it right now. Everything else in
+   the UI stays still. */
+@keyframes current-flow {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.charge-flow {
+  /* Solid base stays constant (so text contrast never dips); only the
+     highlight band moves, so it reads as current sweeping through. */
+  background-color: #3ba7ff;
+  background-image: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  animation: current-flow 2.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .charge-flow {
+    animation: none;
+    background-position: 0 0;
+  }
+}
+
+/* Start/Stop buttons: a fill that floods from the bottom, not a color swap. */
+.btn-flood {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+.btn-flood::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: currentColor;
+  opacity: 0.15;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+@media (hover: hover) {
+  .btn-flood:hover::before {
+    transform: translateY(0);
+  }
+}
+.btn-flood:focus-visible::before,
+.btn-flood:active::before {
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-flood::before {
+    transition: none;
+  }
+}
+
+/* Underline draw: for the brand link and other single nav-style links. */
+.draw {
+  background: linear-gradient(currentColor 0 0) left bottom / 0% 1px no-repeat;
+  transition: background-size 0.45s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+@media (hover: hover) {
+  .draw:hover {
+    background-size: 100% 1px;
+  }
+}
+.draw:focus-visible {
+  background-size: 100% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .draw {
+    transition: none;
+  }
+}
+
+/* Segmented status filter */
+.segmented {
+  display: inline-flex;
+  border: 1px solid rgba(231, 236, 240, 0.09);
+  border-radius: 8px;
+  overflow: clip;
+}
+.segmented button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  color: #8b96a3;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(231, 236, 240, 0.09);
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+.segmented button:last-child {
+  border-right: none;
+}
+.segmented button:hover {
+  color: #e7ecf0;
+}
+.segmented button[aria-pressed="true"]:hover {
+  background: #2bc9a0;
+}
+.segmented button[aria-pressed="true"] {
+  background: #35e7b7;
+  color: #0a0d10;
+}
+
+/* Site card / table row hover: lifts and brightens -- a real move, not a color swap. */
+.lift-on-hover {
+  transition:
+    transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1),
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+}
+.lift-on-hover:hover,
+.lift-on-hover:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(231, 236, 240, 0.22);
+  background-color: #161b21;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift-on-hover {
+    transition: border-color 0.25s ease;
+  }
+  .lift-on-hover:hover,
+  .lift-on-hover:focus-visible {
+    transform: none;
+  }
 }
