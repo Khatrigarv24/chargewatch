@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { closeDb, resetFixture } from "./db";
 
-test.beforeEach(async () => {
+test.beforeEach(async ({ page }) => {
   await resetFixture();
+  page.on("console", (msg) => console.log(`[browser] ${msg.text()}`));
 });
 
 test.afterAll(async () => {
