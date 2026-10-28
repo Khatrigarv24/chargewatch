@@ -1,5 +1,7 @@
 # ChargeWatch
 
+[![CI](https://github.com/Khatrigarv24/chargewatch/actions/workflows/ci.yml/badge.svg)](https://github.com/Khatrigarv24/chargewatch/actions/workflows/ci.yml)
+
 A small full-stack monitoring dashboard for an EV charging network: sites,
 chargers, live status, and energy usage over time.
 
