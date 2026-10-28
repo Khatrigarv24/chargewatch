@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { pool } from "../db/pool.js";
 import { asyncHandler, AppError } from "../lib/errors.js";
+import { computeSessionEnergyKwh } from "../lib/energy.js";
 import { chargerIdParamSchema, listChargersQuerySchema } from "../schemas.js";
 
 export const chargersRouter = Router();
@@ -96,10 +97,11 @@ chargersRouter.post(
       if (openSession.rows.length === 0) {
         throw new AppError(409, "No open session for this charger");
       }
-      const durationHours =
-        (Date.now() - new Date(openSession.rows[0].started_at).getTime()) /
-        3_600_000;
-      const energyKwh = durationHours * Number(chargerRes.rows[0].power_kw);
+      const energyKwh = computeSessionEnergyKwh(
+        new Date(openSession.rows[0].started_at),
+        new Date(),
+        Number(chargerRes.rows[0].power_kw),
+      );
 
       await client.query(
         "UPDATE sessions SET ended_at = now(), energy_kwh = $2 WHERE id = $1",
