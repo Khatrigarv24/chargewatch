@@ -5,6 +5,8 @@
 A small full-stack monitoring dashboard for an EV charging network: sites,
 chargers, live status, and energy usage over time.
 
+![ChargeWatch sites overview](docs/screenshot.png)
+
 **Stack:** React + TypeScript (Vite, Tailwind, Recharts) · Node.js + Express
 + TypeScript · PostgreSQL · Vitest · Playwright · Docker Compose · GitHub
 Actions.
@@ -44,7 +46,9 @@ npm run dev:server      # http://localhost:3000
 npm run dev:client       # http://localhost:5173
 ```
 
-Or the whole stack in containers: `docker compose up`.
+Or the whole stack in containers: `docker compose up` (add `--build` after
+pulling new code — the client/server images aren't volume-mounted, so they
+otherwise keep serving whatever was baked in at the last build).
 
 ## Tests
 
@@ -56,10 +60,20 @@ npm run test:e2e    # playwright: sites overview, filtering, start/stop session,
 CI (`.github/workflows/ci.yml`) runs both against a Postgres service container
 on every push.
 
+Running the e2e suite resets the database to a small deterministic fixture
+(by design, for reproducible tests). If your local data shrinks to one site
+afterwards, that's why — re-run `npm run --workspace server seed` to restore
+the full 5-site demo dataset.
+
 ## Query optimization
 
-See [`docs/query-optimization.md`](docs/query-optimization.md) for the
-before/after `EXPLAIN ANALYZE` on the site energy aggregate query.
+`GET /api/sites/:id/energy` (the hourly energy aggregate) went from
+**29.7ms to 6.3ms** (~4.7x) after adding
+`energy_readings(charger_id, recorded_at)` and rewriting the query to filter
+by charger id instead of joining on it — buffer reads dropped from 4,785 to
+110. See [`docs/query-optimization.md`](docs/query-optimization.md) for the
+full before/after `EXPLAIN ANALYZE` output and why a wide date range doesn't
+show the same win.
 
 ## Extending toward real telemetry
 
