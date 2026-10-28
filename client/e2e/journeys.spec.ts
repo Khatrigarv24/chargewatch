@@ -40,9 +40,8 @@ test("starting a session changes the charger to charging", async ({
 }) => {
   await page.goto("/");
   await page.getByTestId("site-card").click();
-  const row = page
-    .getByTestId("charger-row")
-    .filter({ has: page.getByTestId("start-session") });
+  // Fixture order (by id): available, faulted, charging -- row 0 is available.
+  const row = page.getByTestId("charger-row").nth(0);
   await row.getByTestId("start-session").click();
   await expect(row.getByTestId("charger-status")).toHaveText("charging");
 });
@@ -50,9 +49,8 @@ test("starting a session changes the charger to charging", async ({
 test("stopping a session changes it back to available", async ({ page }) => {
   await page.goto("/");
   await page.getByTestId("site-card").click();
-  const row = page
-    .getByTestId("charger-row")
-    .filter({ has: page.getByTestId("stop-session") });
+  // Fixture order (by id): available, faulted, charging -- row 2 is charging.
+  const row = page.getByTestId("charger-row").nth(2);
   await row.getByTestId("stop-session").click();
   await expect(row.getByTestId("charger-status")).toHaveText("available");
 });
