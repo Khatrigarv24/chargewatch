@@ -58,8 +58,8 @@ sitesRouter.get(
     const energyRes = await pool.query(
       `SELECT COALESCE(SUM(er.power_kw * 5.0 / 60), 0) AS energy_kwh
        FROM energy_readings er
-       JOIN chargers c ON c.id = er.charger_id
-       WHERE c.site_id = $1 AND er.recorded_at >= $2`,
+       WHERE er.charger_id = ANY (SELECT id FROM chargers WHERE site_id = $1)
+         AND er.recorded_at >= $2`,
       [id, todayStart],
     );
 
@@ -91,13 +91,16 @@ sitesRouter.get(
     const toExclusive = new Date(`${to}T00:00:00.000Z`);
     toExclusive.setDate(toExclusive.getDate() + 1);
 
+    // Filtering energy_readings by charger_id (from a small per-site charger
+    // list) instead of joining lets Postgres use the
+    // energy_readings(charger_id, recorded_at) index to seek directly to
+    // each charger's rows in range -- see docs/query-optimization.md.
     const { rows } = await pool.query(
       `SELECT
          date_trunc('hour', er.recorded_at) AS hour,
          SUM(er.power_kw * 5.0 / 60) AS energy_kwh
        FROM energy_readings er
-       JOIN chargers c ON c.id = er.charger_id
-       WHERE c.site_id = $1
+       WHERE er.charger_id = ANY (SELECT id FROM chargers WHERE site_id = $1)
          AND er.recorded_at >= $2
          AND er.recorded_at < $3
        GROUP BY 1
