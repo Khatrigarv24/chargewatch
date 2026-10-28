@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: chargewatch
+          POSTGRES_PASSWORD: chargewatch
+          POSTGRES_DB: chargewatch
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chargewatch"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://chargewatch:chargewatch@localhost:5432/chargewatch
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build server
+        run: npm run build --workspace server
+
+      - name: Run unit and integration tests
+        run: npm run test:unit
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: client
+
+      - name: Run end-to-end tests
+        run: npm run test:e2e
